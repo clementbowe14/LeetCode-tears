@@ -5,9 +5,9 @@ class Solution {
         }
         int max = 0;
         int currentMin = prices[0];
-        for(Integer price : prices) {
-            max = Math.max(price - currentMin, max);
-            currentMin = Math.min(price, currentMin);
+        for(int i = 0; i < prices.length; i++) {
+            max = Math.max(prices[i] - currentMin, max);
+            currentMin = Math.min(currentMin, prices[i]);
         }
         return max;
     }
