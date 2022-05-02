@@ -3,7 +3,6 @@ class Solution {
         if(prices == null || prices.length <= 1 ) {
             return 0;
         }
-        
         int max = 0;
         int currentMin = prices[0];
         for(Integer price : prices) {
