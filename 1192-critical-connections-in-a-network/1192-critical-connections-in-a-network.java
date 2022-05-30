@@ -1,54 +1,39 @@
 class Solution {
-    int[] lowlink;
-    int[] id;
-    boolean[] onStack;
-    boolean[] visited;
-    List<List<Integer>> res;
     
     public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {
-        
-        lowlink = new int[n];
-        id = new int[n];
-        onStack = new boolean[n];
-        visited = new boolean[n];
-        Arrays.fill(id, -1);
-        res = new ArrayList<>();
-    
-        List<List<Integer>> graph = new ArrayList<>();
-        for(int i = 0; i < n; i++)
-            graph.add(new ArrayList<Integer>());
-        
-        for(List<Integer> conn : connections){
-            int U = conn.get(0);
-            int V = conn.get(1);
-            graph.get(U).add(V);
-            graph.get(V).add(U);
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        List<List<Integer>> ans = new ArrayList<>();
+        for(int i = 0; i < n; i++){
+            graph.put(i, new ArrayList<>());
         }
         
-        dfs(0, graph, 0,  -1);
+        for(List<Integer> connection : connections){
+            graph.get(connection.get(0)).add(connection.get(1));
+            graph.get(connection.get(1)).add(connection.get(0));
+        }
         
-        return res;
+        boolean[] visited = new boolean[n];
+        int[] lowlink = new int[n];
+        int [] id = new int[n];
+        dfs(0, visited, lowlink, ans, graph, id, 0,  100000);
+        
+        return ans;
     }
     
-    public void dfs(int index, List<List<Integer>> graph, int rank, int previousValue){
-        onStack[index] = true;
+    public void dfs(int index, boolean[] visited, int[] lowlink, List<List<Integer>> ans, Map<Integer, List<Integer>> graph, int [] id, int currentId, int previousValue) {
         visited[index] = true;
-        id[index] = lowlink[index] = rank;
-        
-    
-        List<Integer> adj = graph.get(index);
-        for(int node : adj){
-            if(node == previousValue)
-                continue;
-            
-            if(!visited[node]){
-                dfs(node, graph, rank+1, index);
+        id[index] = lowlink[index] = currentId;
+        List<Integer> neighbors = graph.get(index);
+        for(Integer neighbor : neighbors) {
+            if(neighbor == previousValue)
+                continue;            
+            if(!visited[neighbor]){
+                dfs(neighbor, visited, lowlink, ans, graph, id, currentId+1, index);
             }
+            lowlink[index] = Math.min(lowlink[neighbor], lowlink[index]);
             
-            lowlink[index] = Math.min(lowlink[node], lowlink[index]);
-            
-            if(lowlink[node] >= rank+1){
-                res.add(new ArrayList(Arrays.asList(index, node)));
+            if(lowlink[neighbor] == 1 + currentId){
+                ans.add(Arrays.asList(index, neighbor));
             }
         }
     }
