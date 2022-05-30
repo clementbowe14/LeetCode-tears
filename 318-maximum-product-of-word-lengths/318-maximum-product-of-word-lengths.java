@@ -1,20 +1,21 @@
 class Solution {
     public int maxProduct(String[] words) {
+        int [] masks = new int[words.length];
+        int idx = 0;
         int ans = 0;
-        int [] values = new int[words.length];
-        for(int i = 0; i < words.length; i++){
-            for(char letter: words[i].toCharArray()){
-                values[i] |= 1 << (letter -'a');
+        for(String word : words){
+            for(char letter : word.toCharArray()){
+                masks[idx] |= 1 <<(letter-'a');
+            }
+            idx++;
+        }
+        for(int i = 0; i < masks.length-1; i++){
+            for(int j = i+1; j < masks.length; j++){
+                if((masks[i] & masks[j]) == 0)
+                    ans = Math.max(words[i].length()*words[j].length(), ans);
             }
         }
         
-        for(int i = 0; i < values.length-1; i++){
-            for(int j = i+1; j < values.length; j++){
-                if((values[i] & values[j]) == 0){
-                    ans = Math.max(ans, words[i].length() * words[j].length());
-                }
-            }
-        }
         return ans;
     }
 }
