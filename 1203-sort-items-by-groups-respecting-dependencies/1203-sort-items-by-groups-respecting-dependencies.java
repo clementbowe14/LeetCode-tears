@@ -1,47 +1,36 @@
 class Solution {
-    
-    boolean canTopSort = true;
-    boolean[] onGroupStack;
-    boolean[] onItemStack;
-    
+    boolean canSort;    
     public int[] sortItems(int n, int m, int[] group, List<List<Integer>> beforeItems) {
-        List<List<Integer>> groups = new ArrayList<>();
         List<List<Integer>> items = new ArrayList<>();
-        List<List<Integer>> groupsToItemsOrder = new ArrayList<>();
-        int[] ans = new int[n];
+        List<List<Integer>> groups = new ArrayList<>();
+        List<List<Integer>> groupsToItems = new ArrayList<>();
+        List<Integer> sortedItems = new ArrayList<>();
+        List<Integer> sortedGroups = new ArrayList<>();
+        int [] ans = new int[n];
+        canSort = true;
         
-        int loc = 0;
-        for(int i : group){
-            if(i == -1){
-                group[loc] = m;
-                m++;
-            }
-            loc++;
-        }
         
-        boolean [] groupsVisited = new boolean[m];
-        boolean[] itemsVisited = new boolean[n];
-        onGroupStack = new boolean[m];
-        onItemStack = new boolean[n];
-        
-        for(int i = 0; i <= m; i++){
-            groupsToItemsOrder.add(new ArrayList<>());
-            groups.add(new ArrayList<Integer>());
-        }
-        for(int i = 0; i < n; i++){
-            items.add(new ArrayList<Integer>());
-        }
-        
-        //create group graph
         for(int i = 0; i < group.length; i++){
+            if(group[i] == -1){
+                group[i] = m++;
+            }
+            items.add(new ArrayList<>());
+        }
+        
+       for(int i = 0; i < m; i++){
+           groups.add(new ArrayList<>());
+           groupsToItems.add(new ArrayList<>());
+       }
+        
+        for(int i = 0; i < n; i++){
             List<Integer> neighbors = beforeItems.get(i);
             for(int neighbor : neighbors){
-                if(group[neighbor] != group[i])
+                if(group[neighbor] != group[i]){
                     groups.get(group[i]).add(group[neighbor]);
+                }
             }
         }
         
-        //create item graph
         for(int i = 0; i < n; i++){
             List<Integer> neighbors = beforeItems.get(i);
             for(int neighbor : neighbors){
@@ -49,61 +38,64 @@ class Solution {
             }
         }
         
-        List<Integer> groupsOrdering = new ArrayList<>();
-        List<Integer> itemsOrdering = new ArrayList<>();
+        boolean[] onStackGroups = new boolean[m];
+        boolean[] visitedItems = new boolean[n];
+        boolean[] visitedGroups = new boolean[m];
+        boolean[] onStackItems = new boolean[n];
         
-        //topSort groups
-        for(int i = 0; i < m; i++){
-            if(!groupsVisited[i]){
-                dfs(i, groups, groupsOrdering, groupsVisited, onGroupStack);
+        for(int i = 0; i < m; i++) {
+            if(!visitedGroups[i]){
+                dfs(i, groups, sortedGroups, visitedGroups, onStackGroups);
+                if(!canSort){
+                    return new int[]{};
+                }
             }
         }
-        
-        if(!canTopSort)
-            return new int[]{};
         
         for(int i = 0; i < n; i++){
-            if(!itemsVisited[i]){
-                dfs(i, items, itemsOrdering, itemsVisited, onItemStack);
+            if(!visitedItems[i]){
+                dfs(i, items, sortedItems, visitedItems, onStackItems);
+            }
+            if(!canSort){
+                return new int[]{};
             }
         }
         
-        if(!canTopSort)
-            return new int[]{};
-        
-        for(int item : itemsOrdering){
-            groupsToItemsOrder.get(group[item]).add(item);
+        for(int i = 0; i < n; i++){
+                groupsToItems.get(group[sortedItems.get(i)]).add(sortedItems.get(i));
         }
         
         int idx = 0;
-        for(int g : groupsOrdering){
-            for(int i : groupsToItemsOrder.get(g))
-                ans[idx++] = i;
+        for(int i = 0; i < m; i++){
+            List<Integer> lst = groupsToItems.get(sortedGroups.get(i));
+            for(int item : lst){
+                ans[idx++] = item;
+            }
         }
         
-        return ans;  
+        return ans;
+            
     }
     
-    public void dfs(int index, List<List<Integer>> graph, List<Integer> ordering, boolean[] visited, boolean[] onStack){
-        if(onStack[index]){
+    public void dfs(int index, List<List<Integer>> graph, List<Integer> topSort, boolean[] visited, boolean[] onStack){
+        if(visited[index])
             return;
+        
+        onStack[index] = true;
+        List<Integer> neighbors = graph.get(index);
+        for(int neighbor : neighbors){
+            if(onStack[neighbor]){
+                canSort = false;
+                break;
+            }
+            
+            dfs(neighbor, graph, topSort, visited, onStack);
         }
         
-        if(visited[index]){
-            canTopSort = false;
-            return;
-        }
-        
+        onStack[index] = false;
+        topSort.add(index);
         visited[index] = true;
-        for(int neighbor : graph.get(index)){
-            dfs(neighbor, graph, ordering, visited, onStack);
-        }
-        
-        if(canTopSort){
-            onStack[index] = true;
-            ordering.add(index);
-        }
-        
-        visited[index] = false;
     }
+    
+    
 }
