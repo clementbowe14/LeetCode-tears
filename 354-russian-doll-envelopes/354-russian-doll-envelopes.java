@@ -4,10 +4,7 @@ class Solution {
         int idx = 0;
         int foldLoc = 0;
         Arrays.sort(envelopes, (a, b) -> {
-            if(a[0] == b[0])
-                return b[1] - a[1];
-            else
-                return a[0] - b[0];
+                return a[0] != b[0] ? a[0]-b[0] :b[1] - a[1];
         });
         
         for(int [] envelope : envelopes) {
