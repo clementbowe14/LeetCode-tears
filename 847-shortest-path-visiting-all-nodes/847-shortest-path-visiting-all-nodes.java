@@ -1,35 +1,33 @@
 class Solution {
-    int[][] cache;
-    int endingMask;
-    public int dp(int node, int mask, int [][] graph){
-        if(cache[node][mask] != 0){
-            return cache[node][mask];
-        }
-        
-        if((mask & (mask-1))  == 0){
+    public int shortestPathLength(int[][] graph) {
+        if(graph.length == 1)
             return 0;
+        int n = graph.length;
+        int end = (1 << n)-1;
+        boolean[][] seen = new boolean[graph.length][end];
+        Queue<int[]> queue = new LinkedList<>();
+        for(int i = 0; i < n; i++) {
+            queue.add(new int[]{i, 1 << i, 0});
         }
         
-        cache[node][mask] = Integer.MAX_VALUE-1;
-        for(int neighbor : graph[node]){
-            if((mask & (1 << neighbor)) != 0){
-                int alreadyVisited = dp(neighbor, mask, graph);
-                int notVisited = dp(neighbor, mask ^(1 << node), graph);
-                int betterOption = Math.min(alreadyVisited, notVisited);
-                cache[node][mask] = Math.min(cache[node][mask], 1+ betterOption);
+        while(!queue.isEmpty()){
+            int [] node = queue.poll();
+            int curr = node[0];
+            int mask = node[1];
+            int steps = node[2];
+            for(int val : graph[node[0]]){
+                int nextState = mask | 1 << val;
+                int nextSteps = 1 + steps;
+                if(nextState == end)
+                    return nextSteps;
+                if(!seen[val][nextState]){
+                    seen[val][nextState] = true;
+                    queue.add(new int[]{val, nextState, nextSteps});
+                }
+                
             }
         }
         
-        return cache[node][mask];
-    }
-    public int shortestPathLength(int[][] graph) {
-        int n = graph.length;
-        endingMask = (1 << n) -1;
-        cache = new int[n+1][endingMask + 1];
-        int best = Integer.MAX_VALUE;
-        for(int node = 0; node < n; node++){
-            best = Math.min(best, dp(node, endingMask, graph));
-        }
-        return best;
+        return -1;
     }
 }
