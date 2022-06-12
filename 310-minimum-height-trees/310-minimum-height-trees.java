@@ -1,44 +1,45 @@
 class Solution {
     public List<Integer> findMinHeightTrees(int n, int[][] edges) {
-        if(n == 1){
-            return new ArrayList<Integer>(Arrays.asList(0));
-        }
-        int[] edgeCount = new int[n];
+        
         List<List<Integer>> graph = new ArrayList<>();
-        List<Integer> ans;
-        for(int i = 0; i < n; i++)
+        int[] in = new int[n];
+        Queue<Integer> queue = new LinkedList<>();
+        List<Integer> ans = new ArrayList<>();
+        
+        for(int i = 0; i < n; i++){
             graph.add(new ArrayList<>());
-        for(int [] arr : edges){
-            graph.get(arr[0]).add(arr[1]);
-            graph.get(arr[1]).add(arr[0]);
-            edgeCount[arr[0]]++;
-            edgeCount[arr[1]]++;
+        }
+        for(int[] edge : edges){
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+            in[edge[0]]++;
+            in[edge[1]]++;
         }
         
-        Queue<Integer> queue = new LinkedList<>();
-        for(int i = 0; i < edgeCount.length; i++){
-            if(edgeCount[i] == 1)
+        for(int i = 0; i < n; i++){
+            if(in[i] <= 1)
                 queue.add(i);
         }
         
-        while(n > 2){
-            n -= queue.size();
+        int rem = n;
+        
+        while(rem > 2){
             int size = queue.size();
+            rem -= size;
             for(int i = 0; i < size; i++){
                 int node = queue.poll();
-                List<Integer> neighbors = graph.get(node);
-                for(int j = 0; j < neighbors.size(); j++){
-                    edgeCount[neighbors.get(j)]--;
-                    if(edgeCount[neighbors.get(j)] == 1){
-                        queue.add(neighbors.get(j));
+                for(int val : graph.get(node)){
+                    in[val]--;
+                    if(in[val] == 1){
+                        queue.add(val);
                     }
                 }
             }
         }
         
-        ans = new ArrayList<>();
-        while(!queue.isEmpty())
+        while(!queue.isEmpty()){
             ans.add(queue.poll());
+        }
         
         return ans;
     }
