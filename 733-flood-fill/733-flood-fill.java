@@ -1,23 +1,26 @@
 class Solution {
-    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
-        if(newColor == image[sr][sc]) {
+    
+    int[][] coord = {{0,1},{0,-1},{-1,0},{1,0}};
+    
+    public int[][] floodFill(int[][] image, int sr, int sc, int color) {
+        if(image[sr][sc] == color){
             return image;
         }
-        
-        dfs(image, sr, sc, image[sr][sc], image.length, image[0].length, newColor);
+        fill(image, sr, sc, image[sr][sc], color);
         return image;
     }
     
-    public void dfs(int[][] image, int sr, int sc, int originalColor, int m, int n, int newColor){
-        if(sr >= m || sc >= n || sr < 0 || sc < 0 || image[sr][sc] != originalColor){
+    public void fill(int [][] image, int row, int col, int startColor, int newColor) {
+        if(row < 0 || row > image.length-1 || col < 0 || col > image[0].length-1 ||  image[row][col] != startColor){
             return;
         }
         
-        image[sr][sc] = newColor;
+        image[row][col] = newColor;
         
-        dfs(image, sr+1, sc, originalColor, m, n, newColor);
-        dfs(image, sr-1, sc, originalColor, m, n, newColor);
-        dfs(image, sr, sc+1, originalColor, m, n, newColor);
-        dfs(image, sr, sc-1, originalColor, m, n, newColor);
+        for(int i = 0; i < coord.length; i++){
+            int newRow = coord[i][0] + row;
+            int newCol = coord[i][1] + col;
+            fill(image, newRow, newCol, startColor, newColor);
+        }
     }
 }
